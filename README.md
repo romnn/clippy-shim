@@ -31,6 +31,7 @@ Add an alias pointing at a small binary that calls this library.
 Example:
 
 ```toml
+# .cargo/config.toml
 [alias]
 lint = "run -p my-clippy-shim -- lint"
 fixit = "run -p my-clippy-shim -- fixit"
