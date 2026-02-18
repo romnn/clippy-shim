@@ -3,11 +3,30 @@ name = "clippy-shim"
 version = "0.0.1"
 edition = "2024"
 authors = ["romnn <contact@romnn.com>"]
-description = ""
+description = "A tiny shim around cargo clippy"
 license-file = "LICENSE"
 readme = "README.md"
 homepage = "https://github.com/romnn/clippy-shim"
 repository = "https://github.com/romnn/clippy-shim"
+categories = [
+  "command-line-utilities",
+  "development-tools",
+  "development-tools::cargo-plugins",
+  "development-tools::testing"
+]
+keywords = [
+  "cargo",
+  "clippy",
+  "shim",
+]
+exclude = [
+  "taskfile.yaml",
+  "TODO.md",
+  ".github",
+  ".bumpversion.toml",
+  ".typos.toml",
+  ".ignore",
+]
 
 [workspace.lints.rust]
 unsafe_code = "deny"
