@@ -9,9 +9,6 @@ A tiny wrapper around `cargo clippy` intended to be invoked via Cargo aliases.
   - `--all-targets`
   - `--all-features`
   - `--workspace` only when invoked from the workspace root and no narrower scope was given
-- Appends strict clippy lints:
-  - `-Dclippy::all`
-  - `-Dclippy::pedantic`
 
 The behavior is designed to work well with `cargo-feature-combinations` (`cargo fc`),
 which runs cargo from individual package directories and does not forward `-p`.

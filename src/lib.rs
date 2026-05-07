@@ -327,10 +327,6 @@ fn build_cargo_clippy_args(
 ///   `--workspace`). When running inside a package directory (as `cargo fc` does),
 ///   we *do not* force `--workspace`.
 ///
-/// - **`-Dclippy::all` / `-Dclippy::pedantic`**: always appended to enforce a strict
-///   lint baseline for this repository. These are intentionally appended after any
-///   user-provided clippy args so the wrapper remains authoritative.
-///
 /// # Errors
 ///
 /// Returns an error if spawning or waiting on the `cargo clippy` process fails.
@@ -357,8 +353,6 @@ fn run_cargo_clippy(
     command.args(cargo_clippy_args);
     command.arg("--");
     command.args(user_clippy_args);
-    command.arg("-Dclippy::all");
-    command.arg("-Dclippy::pedantic");
 
     command.status()
 }
