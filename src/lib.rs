@@ -348,7 +348,18 @@ fn run_cargo_clippy(
     let cargo_clippy_args =
         build_cargo_clippy_args(cargo_args, user_cargo_args, flags, is_workspace_root);
 
-    let mut command = std::process::Command::new("cargo");
+    // Spawn the build driver named by `CARGO_DRIVER` instead of a hardcoded
+    // `cargo`, falling back to `cargo` when unset. This lets the caller run the
+    // inner clippy through a wrapper such as `cargo-zigbuild` (or `cross`) so
+    // native-C dependencies cross-compile for a non-host `--target` — which is
+    // already present in `cargo_clippy_args`, so the driver picks it up. The
+    // mechanism is generic: a caller like `cargo fc` sets this env var to the
+    // driver it selected, but clippy-shim needs no knowledge of the caller.
+    let driver = std::env::var_os("CARGO_DRIVER")
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "cargo".into());
+
+    let mut command = std::process::Command::new(driver);
     command.arg("clippy");
     command.args(cargo_clippy_args);
     command.arg("--");
