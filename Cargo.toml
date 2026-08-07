@@ -44,3 +44,6 @@ indexing_slicing = "deny"
 missing_errors_doc = "warn"
 
 [dependencies]
+
+[workspace.metadata.cargo-fc.subcommands.udeps]
+maximal_features = true
