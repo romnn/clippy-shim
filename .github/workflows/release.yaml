@@ -34,7 +34,9 @@ jobs:
           resolve-versions: true
           publish-delay: 30s
 
+  # Prebuilt binary publication requires an explicit repository-level opt-in.
   release:
+    if: ${{ vars.ENABLE_GORELEASER_RELEASE == 'true' }}
     runs-on: ubuntu-24.04
     needs: [tests]
     timeout-minutes: 45
