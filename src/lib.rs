@@ -360,12 +360,46 @@ fn run_cargo_clippy(
         .unwrap_or_else(|| "cargo".into());
 
     let mut command = std::process::Command::new(driver);
+    // A `cargo lint` alias reaches this process through `cargo run`, which gives the binary it
+    // runs its own package's variables.
+    // A cargo started from a shell never sees them, and cargo reruns a build script whenever a
+    // variable it watches differs from its last build: `ring` watches `CARGO_MANIFEST_DIR` and
+    // `CARGO_PKG_*`, and every crate above it recompiles after it.
+    // Removing them lets the inner clippy share artifacts with an ordinary `cargo check`
+    // instead of invalidating them on every switch.
+    for (name, _) in std::env::vars_os() {
+        if is_package_variable(&name) {
+            command.env_remove(name);
+        }
+    }
     command.arg("clippy");
     command.args(cargo_clippy_args);
     command.arg("--");
     command.args(user_clippy_args);
 
     command.status()
+}
+
+/// Reports whether `name` is one of the variables cargo sets for a single package.
+///
+/// Cargo gives these to the build scripts and binaries of the package it is building or
+/// running, and sets them again for every unit a nested cargo builds, so inheriting them only
+/// ever changes what the nested cargo's build scripts see.
+fn is_package_variable(name: &OsStr) -> bool {
+    const PACKAGE_VARIABLES: &[&str] = &[
+        "CARGO_MANIFEST_DIR",
+        "CARGO_MANIFEST_PATH",
+        "CARGO_MANIFEST_LINKS",
+        "CARGO_CRATE_NAME",
+        "CARGO_BIN_NAME",
+        "CARGO_PRIMARY_PACKAGE",
+        "CARGO_TARGET_TMPDIR",
+        "OUT_DIR",
+    ];
+    let Some(name) = name.to_str() else {
+        return false;
+    };
+    name.starts_with("CARGO_PKG_") || PACKAGE_VARIABLES.contains(&name)
 }
 
 fn usage(program_name: &str) {
@@ -463,6 +497,32 @@ mod tests {
 
     fn count(args: &[String], needle: &str) -> usize {
         args.iter().filter(|arg| arg.as_str() == needle).count()
+    }
+
+    /// `cargo run` hands the wrapper its own package's variables, which must not reach the inner
+    /// cargo, while the driver selection and general cargo configuration must.
+    #[test]
+    fn package_variables_are_recognized() {
+        for name in [
+            "CARGO_MANIFEST_DIR",
+            "CARGO_MANIFEST_PATH",
+            "CARGO_PKG_NAME",
+            "CARGO_PKG_VERSION_MAJOR",
+            "CARGO_CRATE_NAME",
+            "OUT_DIR",
+        ] {
+            assert!(is_package_variable(OsStr::new(name)), "{name}");
+        }
+        for name in [
+            "CARGO",
+            "CARGO_DRIVER",
+            "CARGO_HOME",
+            "CARGO_TARGET_DIR",
+            "CARGO_INCREMENTAL",
+            "RUSTFLAGS",
+        ] {
+            assert!(!is_package_variable(OsStr::new(name)), "{name}");
+        }
     }
 
     #[test]
