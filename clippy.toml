@@ -1,0 +1,13 @@
+# Unwrap, expect, panic, and indexing are denied in production through workspace lints.
+# Tests may use these idiomatic failure modes.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
+
+# Append to Clippy's built-in list of proper nouns instead of replacing it.
+doc-valid-idents = [".."]
+
+disallowed-macros = [
+  { path = "std::dbg", reason = "remove before commit" },
+]

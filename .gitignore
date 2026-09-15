@@ -1,2 +1,7 @@
 .DS_Store
-target/
+/target/
+/.task/
+.cooldown.lock
+goreleaser-dist/
+.intentionally-empty-file.o
+*_compiler_family.o

@@ -337,9 +337,8 @@ fn run_cargo_clippy(
     let (user_cargo_args, user_clippy_args) = split_args_on_double_dash(args);
 
     let workspace_dir = workspace_dir();
-    let is_workspace_root = std::env::current_dir()
-        .ok()
-        .is_some_and(|current_dir| current_dir == workspace_dir);
+    let is_workspace_root =
+        std::env::current_dir().is_ok_and(|current_dir| current_dir == workspace_dir);
 
     let flags = detect_flags(&user_cargo_args);
 
